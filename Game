@@ -1,0 +1,227 @@
+impport java.util.Scanner;
+
+public class Game {
+	private int roundNumber;
+	private Grid gameGrid;
+	public Game() {
+		roundNumber = 0;
+		gameGrid = new Grid();
+	}
+	
+	public void askGame() {
+		System.out.println("Taper 1 si vous voulez jouer avec l'IA, autre chose sinon");
+		Scanner x = new Scanner(System.in);
+		if(x.nextInt() == 1) {
+			System.out.println("Vous allez jouer contre l'IA");
+			System.out.println("Voulez vous jouer en premier [1] ou en second [2] ?");
+			Scanner x2 = new Scanner(System.in);
+			if(x2.nextInt() == 1) {
+				playGameIAJ1();
+			} else {
+				playGameIAJ2();
+			}
+		} else {
+			System.out.println("Vous avez lanc� le mode deux joueurs");
+			playGame();
+		}
+	}
+	
+	public void playGame() {
+		while(gameGrid.checkWinner() == '.' && gameGrid.tieGame() == false) {
+			//afficher le num�ro du tour
+			System.out.println("Tour n� " + roundNumber);
+			roundNumber ++;
+			//afficher la grille
+			gameGrid.printGrid();
+		
+		
+			//demander au joueur 1 o� il veut placer token
+			System.out.println("Au tour du joueur 1");
+			//demander au joueur 1 la ligne o� il veut placer le token
+			int x1 = playerChoiceX();
+			//demander au joueur la colonne o� il veut placer le token
+			int y1 = playerChoiceY();
+			//placer le token
+			while(!gameGrid.placeToken(x1, y1, 'X')) {
+			x1 = playerChoiceX();
+			y1 = playerChoiceY();
+			}
+			
+			//afficher la grille
+			gameGrid.printGrid();
+			//v�rifier si il a gagn�
+			if(gameGrid.checkWinner() == '.' && gameGrid.tieGame() == false) {
+				//demande au joueur 2 o� il veut placer token
+				System.out.println("Au tour du joueur 2");
+				//demander au joueur 2 la ligne o� il veut placer le token
+				int x2 = playerChoiceX();
+				//demander au joueur 2 la colonne o� il veut placer le token
+				int y2 = playerChoiceY();
+				//placer le token
+				while(!gameGrid.placeToken(x2, y2, 'O')) {
+					x2 = playerChoiceX();
+					y2 = playerChoiceY();
+				}
+				//afficher la grille
+				gameGrid.printGrid();
+				//v�rifier si il a gagn�
+			}
+		}
+		//afficher vainqueur
+		gameGrid.printWinner();
+		//ou afficher match nul
+		gameGrid.printTieGame();
+		
+	}
+	
+	//fonction qui demande au joueur d'entrer la ligne de son token
+	private int playerChoiceX() {
+		System.out.println("Il faut entrer le num�ro de la ligne");
+		Scanner x = new Scanner(System.in);
+		return x.nextInt();
+	}
+	//fonction qui demande au joueur d'entrer la colonne de son token
+	private int playerChoiceY() {
+		System.out.println("Il faut entrer le num�ro de la colonne");
+		Scanner y = new Scanner(System.in);
+		return y.nextInt();	
+	}
+		
+	//fonction qui va permettre � l'IA de jouer
+	public int playIA(Grid grid) {
+		int max = -1000; // -1000 la plus petite valeur que l'on peut avoir
+		int maxi = 0; //la valeur de i pour laquelle la valeur de max est la plus grande
+		int tmp; 
+		int round = 1; //nombre de tour
+		for(int i = 0; i<9; i++) { //l'ia teste toutes les valeurs de i
+			if(grid.placeTokenIA(i, 'O')) { //l'ia v�rifie s'il peut placer son token, sinon il passe � une autre case
+				tmp = simulatePlayer(grid, round);
+				if(tmp>max) { //on change la valeur de max lorsque tmp est sup�rieur � max
+					max = tmp;
+					maxi = i; //on change donc la valeur de maxi
+				}
+				grid.getGrid()[i] = '.'; //annuler le placement du token 'O'
+			}
+		}
+		return maxi;
+	}
+	//fonction qui simule les mouvements de l'IA
+	public int simulateIA(Grid grid, int round) {
+		int max = -1000;
+		int tmp;
+		if(grid.checkWinner() != '.' || grid.tieGame()) {
+			return eval(grid, round);
+		}
+		for(int i = 0; i<9; i++) {
+			if(grid.placeTokenIA(i, 'O')) {
+				tmp = simulatePlayer(grid, round);
+				if(tmp>max) {
+					max = tmp;
+				}
+				grid.getGrid()[i] = '.'; //annuler le placement du token 'O'
+			}
+		}
+		return max;
+	}
+	//fonction qui simule les mouvements du joueur
+	public int simulatePlayer(Grid grid, int round) {
+		int min = 1000;
+		int tmp;
+		if(grid.checkWinner() != '.' || grid.tieGame()) {
+			return eval(grid, round);
+		}
+		for(int i = 0; i<9; i++) {
+			if(grid.placeTokenIA(i, 'X')) {
+				tmp = simulateIA(grid, round);
+				if(tmp < min) {
+					min = tmp;
+				}
+				grid.getGrid()[i] = '.'; //annuler le placement du token 'O'
+			}
+		}
+		return min;
+	}
+	//fonction qui �value le r�sultat d'une partie simul�e
+	public int eval(Grid grid, int round) {
+	if(grid.checkWinner() == 'X') {
+		return -1000 + round;
+	}
+	if(grid.checkWinner() == 'O') {
+		return 1000 - round;
+	} else {
+		return 0;
+	}
+	}
+	
+	public void playGameIAJ1() {
+		while(gameGrid.checkWinner() == '.' && gameGrid.tieGame() == false) {
+			//afficher le num�ro du tour
+			System.out.println("Tour n� " + roundNumber);
+			roundNumber ++;
+			//afficher la grille
+			gameGrid.printGrid();
+			
+			//demander au joueur 1 o� il veut placer token
+			System.out.println("Au tour du joueur 1");
+			//demander au joueur 1 la ligne o� il veut placer le token
+			int x1 = playerChoiceX();
+			//demander au joueur la colonne o� il veut placer le token
+			int y1 = playerChoiceY();
+			//placer le token
+			while(!gameGrid.placeToken(x1, y1, 'X')) {
+			x1 = playerChoiceX();
+			y1 = playerChoiceY();
+			}
+			
+			//afficher la grille
+			gameGrid.printGrid();
+			//v�rifier si il a gagn�
+			if(gameGrid.checkWinner() == '.' && gameGrid.tieGame() == false) {
+				Grid g = new Grid(gameGrid);
+				int caseIA = playIA(g);
+				gameGrid.getGrid()[caseIA] = 'O';
+				//afficher la grille
+				gameGrid.printGrid();
+				//v�rifier si il a gagn�
+			}
+		}
+		//afficher vainqueur
+		gameGrid.printWinnerIA();
+		//ou afficher match nul
+		gameGrid.printTieGame();
+	}
+	public void playGameIAJ2() {
+		//afficher la grille
+		gameGrid.printGrid();
+		//v�rifier si il a gagn�
+		while(gameGrid.checkWinner() == '.' && gameGrid.tieGame() == false) {
+			Grid g = new Grid(gameGrid);
+			int caseIA = playIA(g);
+			gameGrid.getGrid()[caseIA] = 'O';
+			//afficher la grille
+			gameGrid.printGrid();
+
+			//v�rifier si il a gagn�
+			if(gameGrid.checkWinner() == '.' && gameGrid.tieGame() == false) {
+				//demande au joueur 2 o� il veut placer token
+				System.out.println("Au tour du joueur 2");
+				//demander au joueur 2 la ligne o� il veut placer le token
+				int x2 = playerChoiceX();
+				//demander au joueur 2 la colonne o� il veut placer le token
+				int y2 = playerChoiceY();
+				//placer le token
+				while(!gameGrid.placeToken(x2, y2, 'X')) {
+					x2 = playerChoiceX();
+					y2 = playerChoiceY();
+				}
+				//afficher la grille
+				gameGrid.printGrid();
+				//v�rifier si il a gagn�
+			}
+		//afficher vainqueur
+		gameGrid.printWinnerIA();
+		//ou afficher match nul
+		gameGrid.printTieGame();
+		}
+	}
+}
