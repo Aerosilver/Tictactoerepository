@@ -1,8 +1,1 @@
-# Tictactoerepository
-# Tictactoerepository
-# Tictactoerepository
-# Tictactoerepository
-# Tictactoerepository
-# Tictactoerepository
-# Tictactoerepository
-# Tictactoerepository
+#This is a Tictactoe game, created in three java classes with the IDE Eclipse :)
